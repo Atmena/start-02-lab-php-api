@@ -15,6 +15,7 @@ try {
 if (isset($uri)) {
     if ($uri[1] === 'technologies') {
         require '../controllers/TechnologyController.php';
+
         $technologyController = new TechnologyController($pdo);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -67,12 +68,11 @@ if (isset($uri)) {
             }
         }
     } else {
-        header("HTTP/1.1 404 Not Found");
-        exit();
+        http_response_code(404);
+        echo json_encode(array("message" => "Page non trouvée."));
     }
 } else {
-    header("HTTP/1.1 400 Bad Request");
+    http_response_code(400);
     echo json_encode(array("message" => "URL invalide."));
-    exit();
 }
 ?>

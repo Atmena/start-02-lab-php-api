@@ -12,17 +12,15 @@ try {
     exit();
 }
 
-require 'controllers/TechnologyController.php';
-
 require 'api/routes/api.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
-if ($uri[1] === 'technologies') {
+if (isset($uri[1]) && $uri[1] === 'technologies') {
     require 'controllers/TechnologyController.php';
 } else {
-    header("HTTP/1.1 404 Not Found");
+    http_response_code(400);
     exit();
 }
 ?>
