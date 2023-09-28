@@ -12,14 +12,12 @@ try {
     exit();
 }
 
-require 'controllers/TechnologyController.php';
-
 require 'api/routes/api.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
 
-if (isset($uri[1]) && $uri[1] === 'technologies') {
+if (isset($uri[1]) && $uri[1] === 'apitest') {
     require 'controllers/TechnologyController.php';
 } else {
     http_response_code(400);

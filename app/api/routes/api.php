@@ -13,7 +13,7 @@ try {
 }
 
 if (isset($uri)) {
-    if ($uri[1] === 'technologies') {
+    if ($uri[1] === 'apitest') {
         require '../controllers/TechnologyController.php';
 
         $technologyController = new TechnologyController($pdo);
