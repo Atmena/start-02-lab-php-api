@@ -12,6 +12,8 @@ try {
     exit();
 }
 
+require 'controllers/TechnologyController.php';
+
 require 'api/routes/api.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
