@@ -32,16 +32,36 @@ if (isset($uri)) {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($uri[2]) && is_numeric($uri[2])) {
                 $result = $technologyController->getTechnologyById($uri[2]);
+        
                 if ($result) {
-                    header('Content-Type: application/json');
-                    echo json_encode($result->fetch(PDO::FETCH_ASSOC));
+                    $data = $result->fetch(PDO::FETCH_ASSOC);
+        
+                    if ($data) {
+                        header('Content-Type: application/json');
+                        echo json_encode($data);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode(array("message" => "La technologie n'existe pas."));
+                    }
                 } else {
-                    http_response_code(404);
+                    http_response_code(500);
                 }
             } else {
                 $result = $technologyController->getAllTechnologies();
-                header('Content-Type: application/json');
-                echo json_encode($result->fetchAll(PDO::FETCH_ASSOC));
+        
+                if ($result) {
+                    $data = $result->fetchAll(PDO::FETCH_ASSOC);
+        
+                    if ($data) {
+                        header('Content-Type: application/json');
+                        echo json_encode($data);
+                    } else {
+                        http_response_code(404);
+                        echo json_encode(array("message" => "Aucune technologie trouvée."));
+                    }
+                } else {
+                    http_response_code(500);
+                }
             }
         }        
         elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {

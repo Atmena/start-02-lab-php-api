@@ -72,15 +72,15 @@ class Technology {
     // Lire toutes les technologies
     public function readAll() {
         $query = "SELECT * FROM " . $this->table_name;
-
         $stmt = $this->conn->prepare($query);
 
         $stmt->execute();
 
-        // Récupérer tous les résultats sous forme d'un tableau associatif
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Récupération du résultat sous forme de tableau associatif
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return json_encode($results); // Convertir les résultats en JSON
+        // Renvoi des données au format JSON
+        return json_encode($row);
     }
 
 
@@ -158,15 +158,11 @@ class TechnologyController {
         $data = $technology->readAll();
     
         if ($data) {
-            $technologies = array();
-            while ($row = $data->fetch(PDO::FETCH_ASSOC)) {
-                $technologies[] = $row;
-            }
             http_response_code(200);
-            echo json_encode($technologies);
+            echo $data;
         } else {
             http_response_code(404);
-            echo json_encode(array("message" => "Aucune technologie trouvée."));
+            echo json_encode(array("message" => "La technologie n'existe pas."));
         }
     }    
 
