@@ -14,7 +14,7 @@ try {
 
 if (isset($uri)) {
     if ($uri[1] === 'apitest') {
-        require '../controllers/TechnologyController.php';
+        require __DIR__ . '/../../controllers/TechnologyController.php';
 
         $technologyController = new TechnologyController($pdo);
 

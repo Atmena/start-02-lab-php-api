@@ -17,10 +17,10 @@ class Technology {
     private $table_name = "technologie";
 
     public $id;
-    public $nom;
+    public $name;
+    public $link;
+    public $logoLink;
     public $categorie_id;
-    public $liens;
-    public $logo_path;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -28,24 +28,31 @@ class Technology {
 
     public function create() {
         // Écriture de la requête SQL pour insérer une nouvelle technologie
-        $sql = "INSERT INTO " . $this->table_name . " (nom, categorie_id, liens, logo_path) VALUES (:nom, :categorie_id, :liens, :logo_path)";
+        $sql = "INSERT INTO " . $this->table_name . " (name, link, liens, logoLink, categorie_id) VALUES (:name, :link, :logoLink), :categorie_id";
 
         // Préparation de la requête
         $stmt = $this->conn->prepare($sql);
 
         // Protection contre les injections SQL
-        $this->nom = htmlspecialchars(strip_tags($this->nom));
-        $this->categorie_id = intval($this->categorie_id); // Assurez-vous que categorie_id est un entier
-        $this->liens = htmlspecialchars(strip_tags($this->liens));
-        $this->logo_path = htmlspecialchars(strip_tags($this->logo_path));
+        if (isset($this->name)) {
+            $this->name = htmlspecialchars(strip_tags($this->name));
+        }
+        if (isset($this->link)) {
+            $this->link = htmlspecialchars(strip_tags($this->link));
+        }
+        if (isset($this->logoLink)) {
+            $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
+        }
+        if (isset($this->categorie_id)) {
+            $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
+        }
+        
 
-        // Remplacement des valeurs liées
-        $stmt->bindParam(':nom', $this->nom);
-        $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT); // Précisez que c'est un entier
-        $stmt->bindParam(':liens', $this->liens);
-        $stmt->bindParam(':logo_path', $this->logo_path);
+        $stmt->bindParam(':name', $this->nom);
+        $stmt->bindParam(':link', $this->liens);
+        $stmt->bindParam(':logoLink', $this->logo_path);
+        $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT);
 
-        // Exécution de la requête
         try {
             $stmt->execute();
             return true;
@@ -57,14 +64,11 @@ class Technology {
     
     // Lire une technologie par son ID
     public function readOne() {
-        // Écriture de la requête SQL pour lire une technologie par son ID
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
     
-        // Liaison de l'ID de la technologie à la requête
         $stmt->bindParam(1, $this->id);
     
-        // Exécution de la requête
         $stmt->execute();
     
         return $stmt;
@@ -72,13 +76,10 @@ class Technology {
     
     // Lire toutes les technologies
     public function readAll() {
-        // Écriture de la requête SQL pour lire toutes les technologies
         $query = "SELECT * FROM " . $this->table_name;
 
-        // Préparation de la requête
         $stmt = $this->conn->prepare($query);
 
-        // Exécution de la requête
         $stmt->execute();
 
         return $stmt;
@@ -86,25 +87,21 @@ class Technology {
 
     // Mettre à jour une technologie
     public function update() {
-        // Écriture de la requête SQL pour mettre à jour une technologie
-        $query = "UPDATE " . $this->table_name . " SET nom = :nom, categorie_id = :categorie_id, liens = :liens, logo_path = :logo_path WHERE id = :id";
+        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE id = :id";
         $stmt = $this->conn->prepare($query);
     
-        // Protection contre les injections SQL
-        $this->nom = htmlspecialchars(strip_tags($this->nom));
+        $this->name = htmlspecialchars(strip_tags($this->name));
+        $this->link = htmlspecialchars(strip_tags($this->link));
+        $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
         $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
-        $this->liens = htmlspecialchars(strip_tags($this->liens));
-        $this->logo_path = htmlspecialchars(strip_tags($this->logo_path));
         $this->id = htmlspecialchars(strip_tags($this->id));
     
-        // Remplacement des valeurs liées
-        $stmt->bindParam(':nom', $this->nom);
+        $stmt->bindParam(':name', $this->name);
+        $stmt->bindParam(':link', $this->link);
+        $stmt->bindParam(':logoLink', $this->logoLink);
         $stmt->bindParam(':categorie_id', $this->categorie_id);
-        $stmt->bindParam(':liens', $this->liens);
-        $stmt->bindParam(':logo_path', $this->logo_path);
         $stmt->bindParam(':id', $this->id);
     
-        // Exécution de la requête
         if ($stmt->execute()) {
             return true;
         } else {
@@ -114,14 +111,11 @@ class Technology {
 
     // Supprimer une technologie par son ID
     public function delete() {
-        // Écriture de la requête SQL pour supprimer une technologie par son ID
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
     
-        // Liaison de l'ID de la technologie à la requête
         $stmt->bindParam(1, $this->id);
     
-        // Exécution de la requête
         if ($stmt->execute()) {
             return true;
         } else {
@@ -137,21 +131,38 @@ class TechnologyController {
         $this->db = $db;
     }
 
-    public function getTechnologyById($id) {
-        $id = htmlspecialchars(strip_tags($id));
+    public function createTechnology($data) {
 
         $technology = new Technology($this->db);
-        $technology->id = $id;
-        $result = $technology->readOne();
-
-        if ($result) {
-            $row = $result->fetch(PDO::FETCH_ASSOC);
-            http_response_code(200);
-            echo json_encode($row);
+        if ($technology->create($data)) {
+            return true;
         } else {
-            http_response_code(404);
-            echo json_encode(array("message" => "La technologie n'existe pas."));
+            return false;
         }
+    }
+
+    public function getTechnologyById($id) {
+
+        $technology = new Technology($this->db);
+        return $technology->readOne($id);
+    }
+
+    public function getAllTechnologies() {
+
+        $technology = new Technology($this->db);
+        return $technology->readAll();
+    }
+
+    public function updateTechnology($id, $data) {
+
+        $technology = new Technology($this->db);
+        return $technology->update($id, $data);
+    }
+
+    public function deleteTechnology($id) {
+
+        $technology = new Technology($this->db);
+        return $technology->delete($id);
     }
 } 
 ?>
