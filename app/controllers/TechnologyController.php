@@ -57,13 +57,17 @@ class Technology {
     public function readOne() {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
-    
+
         $stmt->bindParam(1, $this->id);
-    
+
         $stmt->execute();
-    
-        return $stmt;
-    }   
+
+        // Récupération du résultat sous forme de tableau associatif
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Renvoi des données au format JSON
+        return json_encode($row);
+    }
     
     // Lire toutes les technologies
     public function readAll() {
@@ -73,8 +77,12 @@ class Technology {
 
         $stmt->execute();
 
-        return $stmt;
+        // Récupérer tous les résultats sous forme d'un tableau associatif
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return json_encode($results); // Convertir les résultats en JSON
     }
+
 
     // Mettre à jour une technologie
     public function update() {
@@ -132,16 +140,35 @@ class TechnologyController {
     }
 
     public function getTechnologyById($id) {
-
         $technology = new Technology($this->db);
-        return $technology->readOne($id);
-    }
+        $technology->id = $id;
+        $data = $technology->readOne();
+    
+        if ($data) {
+            http_response_code(200);
+            echo $data;
+        } else {
+            http_response_code(404);
+            echo json_encode(array("message" => "La technologie n'existe pas."));
+        }
+    }    
 
     public function getAllTechnologies() {
-
         $technology = new Technology($this->db);
-        return $technology->readAll();
-    }
+        $data = $technology->readAll();
+    
+        if ($data) {
+            $technologies = array();
+            while ($row = $data->fetch(PDO::FETCH_ASSOC)) {
+                $technologies[] = $row;
+            }
+            http_response_code(200);
+            echo json_encode($technologies);
+        } else {
+            http_response_code(404);
+            echo json_encode(array("message" => "Aucune technologie trouvée."));
+        }
+    }    
 
     public function updateTechnology($id, $data) {
 

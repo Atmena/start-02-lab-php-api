@@ -29,14 +29,21 @@ if (isset($uri)) {
                 echo json_encode(array("message" => "Impossible de créer la technologie."));
             }
         }
-        elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($uri[2]) && is_numeric($uri[2])) {
-                $technologyController->getTechnologyById($uri[2]);
+                $result = $technologyController->getTechnologyById($uri[2]);
+                if ($result) {
+                    header('Content-Type: application/json');
+                    echo json_encode($result->fetch(PDO::FETCH_ASSOC));
+                } else {
+                    http_response_code(404);
+                }
             } else {
-                http_response_code(400);
-                echo json_encode(array("message" => "ID de technologie invalide."));
+                $result = $technologyController->getAllTechnologies();
+                header('Content-Type: application/json');
+                echo json_encode($result->fetchAll(PDO::FETCH_ASSOC));
             }
-        }
+        }        
         elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $data = json_decode(file_get_contents("php://input"), true);
 
