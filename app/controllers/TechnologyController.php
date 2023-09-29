@@ -26,31 +26,22 @@ class Technology {
         $this->conn = $db;
     }
 
-    public function create() {
+    public function create($data) {
         // Écriture de la requête SQL pour insérer une nouvelle technologie
-        $sql = "INSERT INTO " . $this->table_name . " (name, link, liens, logoLink, categorie_id) VALUES (:name, :link, :logoLink), :categorie_id";
+        $sql = "INSERT INTO " . $this->table_name . " (name, link, logoLink, categorie_id) VALUES (:name, :link, :logoLink, :categorie_id)";
 
         // Préparation de la requête
         $stmt = $this->conn->prepare($sql);
 
         // Protection contre les injections SQL
-        if (isset($this->name)) {
-            $this->name = htmlspecialchars(strip_tags($this->name));
-        }
-        if (isset($this->link)) {
-            $this->link = htmlspecialchars(strip_tags($this->link));
-        }
-        if (isset($this->logoLink)) {
-            $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
-        }
-        if (isset($this->categorie_id)) {
-            $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
-        }
-        
+        $this->name = isset($data['name']) ? htmlspecialchars(strip_tags($data['name'])) : null;
+        $this->link = isset($data['link']) ? htmlspecialchars(strip_tags($data['link'])) : null;
+        $this->logoLink = isset($data['logoLink']) ? htmlspecialchars(strip_tags($data['logoLink'])) : null;
+        $this->categorie_id = isset($data['categorie_id']) ? htmlspecialchars(strip_tags($data['categorie_id'])) : null;
 
-        $stmt->bindParam(':name', $this->nom);
-        $stmt->bindParam(':link', $this->liens);
-        $stmt->bindParam(':logoLink', $this->logo_path);
+        $stmt->bindParam(':name', $this->name);
+        $stmt->bindParam(':link', $this->link);
+        $stmt->bindParam(':logoLink', $this->logoLink);
         $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT);
 
         try {
@@ -60,7 +51,7 @@ class Technology {
             echo "Erreur lors de la création de la technologie : " . $exception->getMessage();
             return false;
         }
-    } 
+    }
     
     // Lire une technologie par son ID
     public function readOne() {
@@ -132,7 +123,6 @@ class TechnologyController {
     }
 
     public function createTechnology($data) {
-
         $technology = new Technology($this->db);
         if ($technology->create($data)) {
             return true;
