@@ -77,24 +77,34 @@ class Technology {
         $stmt->execute();
 
         // Récupération du résultat sous forme de tableau associatif
-        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Renvoi des données au format JSON
         return json_encode($row);
     }
 
-
     // Mettre à jour une technologie
     public function update() {
-        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE id = :id";
+        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE ('id' = :id )";
         $stmt = $this->conn->prepare($query);
     
-        $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->link = htmlspecialchars(strip_tags($this->link));
-        $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
-        $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
-        $this->id = htmlspecialchars(strip_tags($this->id));
+        if (isset($this->name)) {
+            $this->name = htmlspecialchars(strip_tags($this->name));
+        }
+        if (isset($this->link)) {
+            $this->link = htmlspecialchars(strip_tags($this->link));
+        }
+        if (isset($this->logoLink)) {
+            $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
+        }
+        if (isset($this->categorie_id)) {
+            $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
+        }
+        if (isset($this->id)) {
+            $this->id = htmlspecialchars(strip_tags($this->id));
+        }
     
+        // Liaison des paramètres
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':link', $this->link);
         $stmt->bindParam(':logoLink', $this->logoLink);
@@ -106,14 +116,14 @@ class Technology {
         } else {
             return false;
         }
-    }    
+    }
 
     // Supprimer une technologie par son ID
     public function delete() {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
     
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(':id', $this->id);
     
         if ($stmt->execute()) {
             return true;
@@ -167,15 +177,44 @@ class TechnologyController {
     }    
 
     public function updateTechnology($id, $data) {
-
+        if (!is_numeric($id)) {
+            return false;
+        }
+    
         $technology = new Technology($this->db);
-        return $technology->update($id, $data);
+    
+        if (isset($data['name'])) {
+            $technology->name = $data['name'];
+        }
+        if (isset($data['link'])) {
+            $technology->link = $data['link'];
+        }
+        if (isset($data['logoLink'])) {
+            $technology->logoLink = $data['logoLink'];
+        }
+        if (isset($data['categorie_id'])) {
+            $technology->categorie_id = $data['categorie_id'];
+        }
+
+        if ($technology->update($id)) {
+            return "Technologie mise à jour avec succès.";
+        } else {
+            return "Impossible de mettre à jour la technologie.";
+        }
     }
+      
 
     public function deleteTechnology($id) {
-
         $technology = new Technology($this->db);
-        return $technology->delete($id);
-    }
+    
+        if ($technology->delete($id)) {
+            http_response_code(204);
+            return;
+        } else {
+            http_response_code(503);
+            echo json_encode(array("message" => "Impossible de supprimer la technologie."));
+            return;
+        }
+    }    
 } 
 ?>
