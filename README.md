@@ -70,6 +70,8 @@ Pour démarrer l'application, suivez ces étapes :
    docker compose up -d
    ```
 
+4. Ajoutez un dossier `media` dans le dossier `app`.
+
 ## Utilisation
 
 Pour utiliser l'API, vous pouvez créer une collection dans POSTMAN avec les liens suivants pour les différentes fonctions :
