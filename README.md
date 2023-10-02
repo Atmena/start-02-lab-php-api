@@ -1,4 +1,3 @@
-```markdown
 # start-02-lab-php-api
 
 Ce projet a pour objectif de mettre en place une API REST permettant d'enregistrer, consulter, modifier et supprimer différentes technologies liées au développement web depuis une base de données.
