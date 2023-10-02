@@ -46,22 +46,6 @@ if (isset($uri)) {
                 } else {
                     http_response_code(500);
                 }
-            } else {
-                $result = $technologyController->getAllTechnologies();
-        
-                if ($result) {
-                    $data = $result->fetchAll(PDO::FETCH_ASSOC);
-        
-                    if ($data) {
-                        header('Content-Type: application/json');
-                        echo json_encode($data);
-                    } else {
-                        http_response_code(404);
-                        echo json_encode(array("message" => "Aucune technologie trouvée."));
-                    }
-                } else {
-                    http_response_code(500);
-                }
             }
         }        
         elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {

@@ -68,20 +68,6 @@ class Technology {
         // Renvoi des données au format JSON
         return json_encode($row);
     }
-    
-    // Lire toutes les technologies
-    public function readAll() {
-        $query = "SELECT * FROM " . $this->table_name;
-        $stmt = $this->conn->prepare($query);
-
-        $stmt->execute();
-
-        // Récupération du résultat sous forme de tableau associatif
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Renvoi des données au format JSON
-        return json_encode($row);
-    }
 
     // Mettre à jour une technologie
     public function update($id) {
@@ -149,20 +135,7 @@ class TechnologyController {
             http_response_code(404);
             echo json_encode(array("message" => "La technologie n'existe pas."));
         }
-    }    
-
-    public function getAllTechnologies() {
-        $technology = new Technology($this->db);
-        $data = $technology->readAll();
-    
-        if ($data) {
-            http_response_code(200);
-            echo $data;
-        } else {
-            http_response_code(404);
-            echo json_encode(array("message" => "La technologie n'existe pas."));
-        }
-    }    
+    } 
 
     public function updateTechnology($id, $data) {
         if (!is_numeric($id)) {
