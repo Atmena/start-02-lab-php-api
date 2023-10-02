@@ -82,7 +82,8 @@ if (isset($uri)) {
         }
         elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             if (isset($uri[2]) && is_numeric($uri[2])) {
-                if ($technologyController->deleteTechnology($uri[2])) {
+                $result = $technologyController->deleteTechnology($uri[2]);
+                if ($result === true) {
                     http_response_code(200);
                     echo json_encode(array("message" => "Technologie supprimée avec succès."));
                 } else {
@@ -93,7 +94,7 @@ if (isset($uri)) {
                 http_response_code(400);
                 echo json_encode(array("message" => "ID de technologie invalide."));
             }
-        }
+        }          
     } else {
         http_response_code(404);
         echo json_encode(array("message" => "Page non trouvée."));

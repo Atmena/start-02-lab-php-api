@@ -107,11 +107,11 @@ class Technology {
     }    
 
     // Supprimer une technologie par son ID
-    public function delete() {
+    public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
     
-        $stmt->bindParam(':id', $this->id);
+        $stmt->bindParam(':id', $id);
     
         if ($stmt->execute()) {
             return true;
@@ -195,13 +195,10 @@ class TechnologyController {
         $technology = new Technology($this->db);
     
         if ($technology->delete($id)) {
-            http_response_code(204);
-            return;
+            return true;
         } else {
-            http_response_code(503);
-            echo json_encode(array("message" => "Impossible de supprimer la technologie."));
-            return;
+            return false;
         }
-    }    
+    }
 } 
 ?>
