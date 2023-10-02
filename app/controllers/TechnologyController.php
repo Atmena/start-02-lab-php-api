@@ -100,25 +100,23 @@ class Technology {
 
     // Mettre à jour une technologie
     public function update($id) {
-        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE id = :id";
+        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, categorie_id = :categorie_id WHERE id = :id";
     
         // Préparation de la requête
         $stmt = $this->conn->prepare($query);
     
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':link', $this->link);
-        $stmt->bindParam(':logoLink', $this->logoLink);
         $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT);
         $stmt->bindParam(':id', $id);
     
         try {
             $stmt->execute();
-            
+    
             if (!empty($this->logoLink)) {
                 $fileContents = file_get_contents($this->logoLink);
     
                 if ($fileContents !== false) {
-                    // Générer le nom du fichier de sauvegarde en utilisant l'ID
                     $fileName = $id . '-' . $this->name . '.webp';
     
                     $filePath = 'media/' . $fileName;
@@ -154,7 +152,6 @@ class Technology {
             // Supprimer le fichier du dossier "media"
             if (!empty($logoLink)) {
                 $filePath = 'media/' . basename($logoLink);
-                var_dump($filePath);
                 if (file_exists($filePath) && is_file($filePath)) {
                     unlink($filePath);
                 }
