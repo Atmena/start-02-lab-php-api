@@ -57,7 +57,7 @@ class Technology {
                     $filePath = 'media/' . $fileName;
                     
                     if (file_put_contents($filePath, $fileContents) !== false) {
-                        $this->logoLink = $filePath;
+                        $this->logoLink = 'http://php-dev-2.online/' . $filePath;
                     } else {
                         echo "Erreur lors de la sauvegarde du fichier.";
                         return false;
