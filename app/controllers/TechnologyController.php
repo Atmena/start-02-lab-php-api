@@ -29,29 +29,58 @@ class Technology {
     public function create($data) {
         // Écriture de la requête SQL pour insérer une nouvelle technologie
         $sql = "INSERT INTO " . $this->table_name . " (name, link, logoLink, categorie_id) VALUES (:name, :link, :logoLink, :categorie_id)";
-
+    
         // Préparation de la requête
         $stmt = $this->conn->prepare($sql);
-
+    
         // Protection contre les injections SQL
         $this->name = isset($data['name']) ? htmlspecialchars(strip_tags($data['name'])) : null;
         $this->link = isset($data['link']) ? htmlspecialchars(strip_tags($data['link'])) : null;
         $this->logoLink = isset($data['logoLink']) ? htmlspecialchars(strip_tags($data['logoLink'])) : null;
         $this->categorie_id = isset($data['categorie_id']) ? htmlspecialchars(strip_tags($data['categorie_id'])) : null;
-
+    
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':link', $this->link);
         $stmt->bindParam(':logoLink', $this->logoLink);
         $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT);
-
+    
         try {
             $stmt->execute();
+            $newTechnologyId = $this->conn->lastInsertId();
+    
+            if (!empty($this->logoLink)) {
+                $fileContents = file_get_contents($this->logoLink);
+    
+                if ($fileContents !== false) {
+                    $fileName = $newTechnologyId . '-' . $this->name . '.webp';
+                    
+                    $filePath = 'media/' . $fileName;
+                    
+                    if (file_put_contents($filePath, $fileContents) !== false) {
+                        $this->logoLink = $filePath;
+                    } else {
+                        echo "Erreur lors de la sauvegarde du fichier.";
+                        return false;
+                    }
+                } else {
+                    echo "Erreur lors de la récupération du fichier depuis l'URL.";
+                    return false;
+                }
+            }
+    
+            // Exécutez à nouveau la requête SQL pour mettre à jour le champ logoLink
+            $sqlUpdate = "UPDATE " . $this->table_name . " SET logoLink = :logoLink WHERE id = :id";
+            $stmtUpdate = $this->conn->prepare($sqlUpdate);
+            $stmtUpdate->bindParam(':logoLink', $this->logoLink);
+            $stmtUpdate->bindParam(':id', $newTechnologyId, PDO::PARAM_INT);
+            $stmtUpdate->execute();
+    
             return true;
         } catch (PDOException $exception) {
             echo "Erreur lors de la création de la technologie : " . $exception->getMessage();
             return false;
         }
-    }
+    }    
     
     // Lire une technologie par son ID
     public function readOne() {
@@ -85,6 +114,26 @@ class Technology {
         try {
             $stmt->execute();
             
+            if (!empty($this->logoLink)) {
+                $fileContents = file_get_contents($this->logoLink);
+    
+                if ($fileContents !== false) {
+                    // Générer le nom du fichier de sauvegarde en utilisant l'ID
+                    $fileName = $id . '-' . $this->name . '.webp';
+    
+                    $filePath = 'media/' . $fileName;
+    
+                    if (file_put_contents($filePath, $fileContents) !== false) {
+                        $this->logoLink = $filePath;
+                    } else {
+                        echo "Erreur lors de la sauvegarde du fichier.";
+                        return false;
+                    }
+                } else {
+                    echo "Erreur lors de la récupération du fichier depuis l'URL.";
+                    return false;
+                }
+            }
             return true;
         } catch (PDOException $exception) {
             echo "Erreur lors de la mise à jour de la technologie : " . $exception->getMessage();
@@ -92,11 +141,28 @@ class Technology {
         }
     }    
 
-    // Supprimer une technologie par son ID
     public function delete($id) {
+        $sqlSelect = "SELECT logoLink FROM " . $this->table_name . " WHERE id = :id";
+        $stmtSelect = $this->conn->prepare($sqlSelect);
+        $stmtSelect->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmtSelect->execute();
+
+        if ($stmtSelect->rowCount() > 0) {
+            $row = $stmtSelect->fetch(PDO::FETCH_ASSOC);
+            $logoLink = $row['logoLink'];
+    
+            // Supprimer le fichier du dossier "media"
+            if (!empty($logoLink)) {
+                $filePath = 'media/' . basename($logoLink);
+                var_dump($filePath);
+                if (file_exists($filePath) && is_file($filePath)) {
+                    unlink($filePath);
+                }
+            }
+        }
+    
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-    
         $stmt->bindParam(':id', $id);
     
         if ($stmt->execute()) {
@@ -104,7 +170,7 @@ class Technology {
         } else {
             return false;
         }
-    }    
+    }      
 }
 
 class TechnologyController {

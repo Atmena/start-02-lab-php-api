@@ -75,8 +75,8 @@ Pour démarrer l'application, suivez ces étapes :
 Pour utiliser l'API, vous pouvez créer une collection dans POSTMAN avec les liens suivants pour les différentes fonctions :
 
 - Créer une nouvelle technologie (POST) : http://php-dev-2.online/technologies/
-- Obtenir les informations d'une technologie (GET) : http://php-dev-2.online/apitest/{id}
-- Mettre à jour les informations d'une technologie (PUT) : http://php-dev-2.online/apitest/{id}
-- Supprimer une technologie (DELETE) : http://php-dev-2.online/apitest/{id}
+- Obtenir les informations d'une technologie (GET) : http://php-dev-2.online/technologies/{id}
+- Mettre à jour les informations d'une technologie (PUT) : http://php-dev-2.online/technologies/{id}
+- Supprimer une technologie (DELETE) : http://php-dev-2.online/technologies/{id}
 
 Assurez-vous de remplacer `{id}` par l'identifiant de la technologie dans la base de données.
