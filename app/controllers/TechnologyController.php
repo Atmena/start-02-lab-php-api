@@ -84,39 +84,27 @@ class Technology {
     }
 
     // Mettre à jour une technologie
-    public function update() {
-        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE ('id' = :id )";
+    public function update($id) {
+        $query = "UPDATE " . $this->table_name . " SET name = :name, link = :link, logoLink = :logoLink, categorie_id = :categorie_id WHERE id = :id";
+    
+        // Préparation de la requête
         $stmt = $this->conn->prepare($query);
     
-        if (isset($this->name)) {
-            $this->name = htmlspecialchars(strip_tags($this->name));
-        }
-        if (isset($this->link)) {
-            $this->link = htmlspecialchars(strip_tags($this->link));
-        }
-        if (isset($this->logoLink)) {
-            $this->logoLink = htmlspecialchars(strip_tags($this->logoLink));
-        }
-        if (isset($this->categorie_id)) {
-            $this->categorie_id = htmlspecialchars(strip_tags($this->categorie_id));
-        }
-        if (isset($this->id)) {
-            $this->id = htmlspecialchars(strip_tags($this->id));
-        }
-    
-        // Liaison des paramètres
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':link', $this->link);
         $stmt->bindParam(':logoLink', $this->logoLink);
-        $stmt->bindParam(':categorie_id', $this->categorie_id);
-        $stmt->bindParam(':id', $this->id);
+        $stmt->bindParam(':categorie_id', $this->categorie_id, PDO::PARAM_INT);
+        $stmt->bindParam(':id', $id);
     
-        if ($stmt->execute()) {
+        try {
+            $stmt->execute();
+            
             return true;
-        } else {
+        } catch (PDOException $exception) {
+            echo "Erreur lors de la mise à jour de la technologie : " . $exception->getMessage();
             return false;
         }
-    }
+    }    
 
     // Supprimer une technologie par son ID
     public function delete() {
@@ -195,7 +183,6 @@ class TechnologyController {
         if (isset($data['categorie_id'])) {
             $technology->categorie_id = $data['categorie_id'];
         }
-
         if ($technology->update($id)) {
             return "Technologie mise à jour avec succès.";
         } else {

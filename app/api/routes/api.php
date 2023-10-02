@@ -66,7 +66,7 @@ if (isset($uri)) {
         }        
         elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             $data = json_decode(file_get_contents("php://input"), true);
-
+            
             if (isset($uri[2]) && is_numeric($uri[2])) {
                 if ($technologyController->updateTechnology($uri[2], $data)) {
                     http_response_code(200);
